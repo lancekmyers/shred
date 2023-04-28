@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 module MyLib (someFunc) where
 
@@ -135,4 +136,8 @@ myPath :: [PathKey]
 myPath = [Repeated "contacts", Optional "phoneNumber"]
 
 someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+someFunc = do
+  Just json <- decode <$> B.readFile "test.json" :: IO (Maybe Value)
+  let path = [Required "menu", Repeated "items", Optional "label"]
+  let col = shred @Text json path
+  BV.mapM_ print col
