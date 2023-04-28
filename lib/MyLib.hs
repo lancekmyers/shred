@@ -75,10 +75,13 @@ unshred pth col = BV.foldl' go (Array []) col
       Value ->
       (Int, Int, Maybe a) ->
       Value
+    go val (0, d, x) =
+      let rec = mkRecord (take (d + 1) pth) (toJSON <$> x)
+       in over _Array (flip BV.snoc rec) val
     go val (r, d, x) =
-      let (accer, mker) = splitOnRepLevel r pth
+      let (accer, mker) = splitOnRepLevel r (take (d + 1) pth)
        in let rec2 = mkRecord mker (toJSON <$> x)
-           in over (mkTrav accer % _Array) (flip BV.snoc rec2) val
+           in over (_Array % _last % mkTrav accer % _Array) (flip BV.snoc rec2) val
 
 splitOnRepLevel :: Int -> [PathKey] -> ([PathKey], [PathKey])
 splitOnRepLevel r xs = go r xs []
